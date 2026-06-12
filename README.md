@@ -19,8 +19,8 @@ To compile and run this code, you must have docker installed. The code uses deal
 Clone the code from the GitHub repository to your local machine:
 
 ```bash
-git clone https://github.com/gabstank/topopt.git
-cd topopt
+git clone https://github.com/gabstank/Stress-constrained-VTTO.git
+cd Stress-constrained-VTTO
 ```
 
 ### Docker image
