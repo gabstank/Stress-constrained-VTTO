@@ -1,0 +1,125 @@
+set Analysis name    = crack-volume-min
+set BVP Type         = elasticityLin
+set Destination path = ./results/crack-volume-min/
+set Problem type     = opt
+set Verbose output   = false
+
+subsection Domain
+  set Geometry name = hyper_rectangle
+  set Global refinements = 1
+  set Padding = true
+  
+  subsection Hyper rectangle
+    set Hyper rectangle point1 = -10,-10
+    set Hyper rectangle point2 = 0,10
+    set Hyper rectangle subdivisions = 20,40
+  end
+
+  subsection Boundary
+    set Boundary IDs   = 1,1,2,2,3,3
+    set Boundary comp  = 0,1,0,1,0,1
+    set Boundary coord = 0,-5,-10,9.5,-0.25,-10
+    set Boundary tol   = 1e-4,5,1e-4,0.5,0.25,1e-4
+  end
+end
+
+subsection BVP
+  set Polynomial degree = 1
+
+  subsection Dirichlet BC
+    set Dirichlet ID    = 1,3
+    set Dirichlet comp  = 0,1
+    set Dirichlet value = 0,0
+  end
+
+  subsection Neumann BC
+    set Neumann ID    = 2
+    set Neumann comp  = 0
+    set Neumann value = -0.01
+  end
+end
+
+subsection Material
+  set Material law = NeoHooke
+
+  subsection Elastic isotropic
+    set lambda       = 0.3297 #Plane stress
+    set mu           = 0.3846
+  end
+end
+
+subsection Solver
+  set Solver tolerance          = 1e-8
+  set Solver type               = CG
+end
+
+subsection Optimization
+  set Optimizer = MMA
+  set Continuation interval = 1
+  set Continuation start iteration = 1
+
+  subsection MMA
+    set Asymptote move decrease = 0.7
+    set Asymptote move increase = 1.2
+    set Asymptote move initial  = 0.5
+    set Constraint modification = true
+    set Move limit              = 0.02
+    set Robust asymptotes type  = 0
+  end 
+  
+    subsection Responses
+      set Objective               = volume
+      set Constraints             = PNStress
+      set Constraints types       = upper
+      set Constraints values      = 0.02
+    end
+
+  subsection Design field
+    set Mode = variable-thickness
+    set Initial density       = 0.8
+    set Penalty = 3
+    set Stress relaxation epsilon initial = 0.1
+    set Stress relaxation epsilon target = 0.001
+    set Stress relaxation target iteration = 150
+
+    subsection Variable-thickness
+      set Penalty continuation = false
+      set Penalty target iteration = 50
+      set Low thickness threshold = 0.1
+    end
+  end
+
+  subsection Filters
+    set Blur filter = true
+    set Blur filter type = pde
+    set Blur filter radius = 0.25
+    set PDE filter boundary penalization = false
+
+    set Heaviside projection = true
+    set Heaviside projection threshold = 0.5
+    set Heaviside projection beta = 10
+    set Heaviside projection target iteration = 100
+
+    subsection Variable-thickness
+      set DGI projection = true
+      set DGI projection beta = 10
+      set DGI projection target iteration = 100
+    end
+  end
+
+  subsection Convergence
+    set Design change tolerance           = 0.0001
+    set Max iterations          = 300
+  end
+
+  subsection Adaptive meshing
+    set Active = true
+    set Start iteration = 5
+    set Adaptation interval = 5
+    set Criterion = DENSITY-JUMP
+    set Max h refinements = 2
+    set Min h refinements = 0
+    set Relative threshold refinement = 0.05
+    set Relative threshold coarsening = 1e-2
+  end
+end
